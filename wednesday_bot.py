@@ -1,5 +1,7 @@
 #! /usr/bin/env python3
+import sys
 import json
+import random
 
 from frozeindea.bot_api import BotAPI
 from frozeindea.bot_api import get_args_parser
@@ -14,10 +16,9 @@ class WednesdayBot(BotAPI):
         self.msgs = msgs
 
     def send_update(self, to=None):
-        logger.debug("Sending update to %s", str(to))
-
         for chan in self.chans.keys():
             for msg in self.msgs:
+                logger.debug(f"{chan} {msg}")
                 self.send_msg(chan, msg)
 
         self.quit()
@@ -39,21 +40,63 @@ def consume_one_video(fn="wednesdays.json", video_list=None):
     return first
 
 
-if __name__ == "__main__":
-    parser = get_args_parser("Wednesday miracle bot.")
-
-    parser._actions = [
-        action for action in parser._actions
-        if "--nick" not in action.option_strings
+def get_wednesday_name():
+    tokens = [
+        "Day",
+        "Dude",
+        "Spook",
+        "Dudes",
+        "Duden",
+        "Many",
+        "Bot",
+        "Art",
+        "Frog",
+        "Ancient",
+        "Prophet",
+        "Tactic",
+        "Mutate",
+        "Look",
+        "Witness",
+        "Miracle",
+        "TheDay",
+        "Frogs",
+        "Bros",
+        "Friends",
+        "Alien",
+        "Cat",
+        "Mother",
+        "Father",
+        "Sun",
+        "Moon",
+        "Idiot",
+        "Sea",
+        "Fart",
     ]
 
+    rand_nick = random.choice(tokens)
+    if random.choice([True, False]):
+        return rand_nick + "Wednesday"
+    else:
+        return "Wednesday" + rand_nick
+
+
+if __name__ == "__main__":
+    parser = get_args_parser("Wednesday miracle bot.")
+    parser._actions = [
+        action for action in parser._actions if "--nick" not in action.option_strings
+    ]
     args = parser.parse_args()
 
-    yt_link = consume_one_video()
-    msgs = ["It is Wednesday MY DUDES!", yt_link]
-    nick = "Wednesdaytest"
+    video_url = consume_one_video()
+    if not video_url:
+        logger.error("No more wednesdays.")
+        sys.exit(1)
 
-    bot = WednesdayBot(nick, args.channels, args.server, msgs, port=args.port)
+    msgs = ["It is Wednesday MY DUDES!", video_url]
+
+    bot = WednesdayBot(
+        get_wednesday_name(), args.channels, args.server, msgs, port=args.port
+    )
     bot.verbose = not args.quiet
 
     try:
